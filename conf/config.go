@@ -8,7 +8,8 @@ import (
 )
 
 type config struct {
-	MysqlDSN string `mapstructure:"MYSQL_DSN"`
+	MysqlDSN     string `mapstructure:"MYSQL_DSN"`
+	TelebotToken string `mapstructure:"TELEBOT_TOKEN"`
 }
 
 func (c config) tags() []string {

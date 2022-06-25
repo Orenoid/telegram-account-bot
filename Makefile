@@ -41,8 +41,9 @@ mock:
 
 test: # @HELP 运行单元测试
 test:
-	@go test -cover \
+	@GOARCH=amd64 go test -gcflags=all=-l -cover \
 		./service/...\
-		./conf/...
+		./conf/...\
+		./telebot/...
 
 .PHONY: help version mock test

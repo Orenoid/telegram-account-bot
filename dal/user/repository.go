@@ -1,6 +1,6 @@
 package user
 
-import "github.com/orenoid/account-bot/models"
+import "github.com/orenoid/telegram-account-bot/models"
 
 type Repository interface {
 	CreateUser() (*models.User, error)

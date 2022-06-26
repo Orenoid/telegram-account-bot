@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/orenoid/account-bot/conf"
-	"github.com/orenoid/account-bot/telebot"
+	"github.com/orenoid/telegram-account-bot/conf"
+	"github.com/orenoid/telegram-account-bot/telebot"
 	"github.com/spf13/cobra"
 	tele "gopkg.in/telebot.v3"
 	"time"

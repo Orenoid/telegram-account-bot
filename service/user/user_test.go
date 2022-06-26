@@ -2,8 +2,8 @@ package user
 
 import (
 	"github.com/golang/mock/gomock"
-	"github.com/orenoid/account-bot/dal/user"
-	"github.com/orenoid/account-bot/models"
+	"github.com/orenoid/telegram-account-bot/dal/user"
+	"github.com/orenoid/telegram-account-bot/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"

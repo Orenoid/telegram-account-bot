@@ -1,4 +1,4 @@
-module github.com/orenoid/account-bot
+module github.com/orenoid/telegram-account-bot
 
 go 1.17
 

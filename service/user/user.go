@@ -1,8 +1,8 @@
 package user
 
 import (
-	"github.com/orenoid/account-bot/dal/user"
-	"github.com/orenoid/account-bot/models"
+	"github.com/orenoid/telegram-account-bot/dal/user"
+	"github.com/orenoid/telegram-account-bot/models"
 	"github.com/pkg/errors"
 )
 

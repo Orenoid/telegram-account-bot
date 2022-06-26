@@ -37,6 +37,8 @@ mock: # @HELP 为 Repository 接口生成 mock 代码
 mock:
 	mockgen -source=dal/user/repository.go -destination=dal/user/mock.go -package=user
 	mockgen -source=dal/bill/repository.go -destination=dal/bill/mock.go -package=bill
+	mockgen -source=dal/telegram/repository.go -destination=dal/telegram/mock.go -package=telegram
+	mockgen -destination=mock/telebotmock/mock.go -package=telebotmock gopkg.in/telebot.v3 Context
 	@echo Done.
 
 test: # @HELP 运行单元测试

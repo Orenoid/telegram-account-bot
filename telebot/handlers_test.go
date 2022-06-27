@@ -55,29 +55,21 @@ func (suite *HandlersHubTestSuite) TestHandleStartCommand() {
 	ctx.EXPECT().Sender().Return(&telebot.User{ID: 417714530102, Username: "JustARandomName"}).Times(1)
 	ctx.EXPECT().Send("hello")
 
-	var methodParams = struct {
+	type MethodParams struct {
 		userID   int64
 		userName string
 		chatID   int64
-	}{}
+	}
+	var methodParams MethodParams
 	gomonkey.ApplyMethod(reflect.TypeOf(suite.teleService), "CreateOrUpdateTelegramUser",
 		func(service *telegram.Service, userID int64, userName string, chatID int64) (*models.TelegramUser, error) {
-			methodParams.userID = userID
-			methodParams.userName = userName
-			methodParams.chatID = chatID
+			methodParams = MethodParams{userID, userName, chatID}
 			return nil, nil
 		},
 	)
 	err := suite.hub.HandleStartCommand(ctx)
 	suite.NoError(err)
-	suite.Equal(
-		struct {
-			userID   int64
-			userName string
-			chatID   int64
-		}{
-			417714530102, "JustARandomName", 592371906012,
-		}, methodParams)
+	suite.Equal(MethodParams{417714530102, "JustARandomName", 592371906012}, methodParams)
 }
 
 func (suite *HandlersHubTestSuite) TestHandleStartCommandIfNilChat() {

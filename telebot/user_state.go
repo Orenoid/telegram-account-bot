@@ -8,6 +8,7 @@ import (
 type UserStateType string
 
 const (
+	Empty        UserStateType = "empty"
 	CreatingBill UserStateType = "creatingBill"
 )
 
@@ -21,7 +22,7 @@ type UserState struct {
 }
 
 type UserStateManager interface {
-	GetUserState(userID int64) (state *UserState, exists bool, err error)
+	GetUserState(userID int64) (state *UserState, err error)
 	SetUserState(userID int64, state *UserState) error
 	ClearUserState(userID int64) error
 }
@@ -30,16 +31,16 @@ type InMemoryUserStateManager struct {
 	cache *sync.Map
 }
 
-func (manager *InMemoryUserStateManager) GetUserState(userID int64) (state *UserState, exists bool, err error) {
+func (manager *InMemoryUserStateManager) GetUserState(userID int64) (state *UserState, err error) {
 	value, found := manager.cache.Load(userID)
 	if !found {
-		return nil, false, nil
+		return &UserState{Type: Empty}, nil
 	}
 	state, ok := value.(*UserState)
 	if !ok {
-		return nil, false, errors.Errorf("invalid type of state value: %T", value)
+		return nil, errors.Errorf("invalid type of state value: %T", value)
 	}
-	return state, true, nil
+	return state, nil
 }
 
 func (manager *InMemoryUserStateManager) SetUserState(userID int64, state *UserState) error {

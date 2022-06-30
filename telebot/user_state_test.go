@@ -27,20 +27,19 @@ func TestInMemoryUserStateManager_ClearUserState(t *testing.T) {
 
 func TestInMemoryUserStateManager_GetUserState(t *testing.T) {
 	m := NewInMemoryUserStateManager()
-	preState := &UserState{}
-	m.cache.Store(int64(42), preState)
+	currState := &UserState{Type: UserStateType("currState")}
+	m.cache.Store(int64(42), currState)
 	m.cache.Store(int64(44), "not *UserState")
 
-	state, exists, err := m.GetUserState(42)
-	assert.True(t, exists)
+	state, err := m.GetUserState(42)
+	assert.Equal(t, currState, state)
 	assert.NoError(t, err)
-	assert.True(t, preState == state)
+	assert.True(t, currState == state)
 
-	state, exists, err = m.GetUserState(43)
-	assert.NoError(t, err)
-	assert.False(t, exists)
+	state, err = m.GetUserState(43)
+	assert.Equal(t, Empty, state.Type)
 
-	state, exists, err = m.GetUserState(44)
+	state, err = m.GetUserState(44)
 	assert.ErrorContains(t, err, "invalid type of state value: string")
 }
 

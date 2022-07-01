@@ -47,7 +47,8 @@ func TestRegisterHandlers(t *testing.T) {
 		realRegistered[endpoint] = h
 	})
 	expectedRegistered := map[interface{}]telebot.HandlerFunc{
-		"/start": hub.HandleStartCommand,
+		"/start":       hub.HandleStartCommand,
+		telebot.OnText: hub.HandleText,
 	}
 	defer patches.Reset()
 	RegisterHandlers(bot, hub)

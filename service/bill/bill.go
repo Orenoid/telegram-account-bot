@@ -23,6 +23,6 @@ func (receiver *Service) CreateNewBill(userID uint, amount float64, category str
 	return receiver.billRepo.CreateBillAndUpdateUserBalance(userID, amount, category, opts...)
 }
 
-func NewService(billRepo bill.Repository, userRepo user.Repository) (*Service, error) {
-	return &Service{billRepo: billRepo, userRepo: userRepo}, nil
+func NewService(billRepo bill.Repository, userRepo user.Repository) *Service {
+	return &Service{billRepo: billRepo, userRepo: userRepo}
 }

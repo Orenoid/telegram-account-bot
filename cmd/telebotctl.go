@@ -3,13 +3,18 @@ package main
 import (
 	"fmt"
 	"github.com/orenoid/telegram-account-bot/conf"
-	teleDAL "github.com/orenoid/telegram-account-bot/dal/telegram"
-	"github.com/orenoid/telegram-account-bot/service/telegram"
+	billdal "github.com/orenoid/telegram-account-bot/dal/bill"
+	teledal "github.com/orenoid/telegram-account-bot/dal/telegram"
+	userdal "github.com/orenoid/telegram-account-bot/dal/user"
+	billservice "github.com/orenoid/telegram-account-bot/service/bill"
+	teleservice "github.com/orenoid/telegram-account-bot/service/telegram"
 	"github.com/orenoid/telegram-account-bot/telebot"
 	"github.com/spf13/cobra"
 	tele "gopkg.in/telebot.v3"
 	"time"
 )
+
+// TODO 单元测试
 
 var cmd = &cobra.Command{
 	Use:   "telebotctl",
@@ -25,13 +30,25 @@ var cmd = &cobra.Command{
 			Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 		}
 
-		teleRepo, err := teleDAL.NewMysqlRepo(config.MysqlDSN)
+		teleRepo, err := teledal.NewMysqlRepo(config.MysqlDSN)
 		if err != nil {
 			panic(err)
 		}
-		teleService := telegram.NewService(teleRepo)
+		billRepo, err := billdal.NewMysqlRepo(config.MysqlDSN)
+		if err != nil {
+			panic(err)
+		}
+		userRepo, err := userdal.NewMysqlRepo(config.MysqlDSN)
+		if err != nil {
+			panic(err)
+		}
 
-		hub := telebot.NewHandlerHub(teleService)
+		teleService := teleservice.NewService(teleRepo)
+		billService := billservice.NewService(billRepo, userRepo)
+
+		telegramUserStateManager := telebot.NewInMemoryUserStateManager()
+
+		hub := telebot.NewHandlerHub(billService, teleService, telegramUserStateManager)
 		bot, err := telebot.NewBot(settings, hub)
 		if err != nil {
 			panic(err)

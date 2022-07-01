@@ -19,8 +19,7 @@ func TestNewService(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	billRepo := bill.NewMockRepository(ctrl)
 	userRepo := user.NewMockRepository(ctrl)
-	service, err := NewService(billRepo, userRepo)
-	assert.NoError(t, err)
+	service := NewService(billRepo, userRepo)
 	assert.True(t, billRepo == service.billRepo)
 	assert.True(t, userRepo == service.userRepo)
 }
@@ -42,11 +41,8 @@ func (suite *BillServiceTestSuite) SetupTest(t *testing.T) func() {
 	suite.userMockCtrl = gomock.NewController(t)
 	suite.userRepo = user.NewMockRepository(suite.userMockCtrl)
 
-	var err error
-	suite.billService, err = NewService(suite.billRepo, suite.userRepo)
-	if err != nil {
-		panic(err)
-	}
+	suite.billService = NewService(suite.billRepo, suite.userRepo)
+
 	return func() {
 		suite.billMockCtrl.Finish()
 		suite.billMockCtrl = nil

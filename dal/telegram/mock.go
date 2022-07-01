@@ -48,3 +48,18 @@ func (mr *MockRepositoryMockRecorder) CreateOrUpdateTelegramUser(userID, userNam
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateTelegramUser", reflect.TypeOf((*MockRepository)(nil).CreateOrUpdateTelegramUser), userID, userName, chatID)
 }
+
+// GetUser mocks base method.
+func (m *MockRepository) GetUser(teleUserID int64) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser", teleUserID)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUser indicates an expected call of GetUser.
+func (mr *MockRepositoryMockRecorder) GetUser(teleUserID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockRepository)(nil).GetUser), teleUserID)
+}

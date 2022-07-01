@@ -7,6 +7,7 @@ import (
 	"github.com/orenoid/telegram-account-bot/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gorm.io/gorm"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -62,6 +63,19 @@ func (suite *ServiceTestSuite) TestCreateOrUpdateUser() {
 	userFromService, err := suite.teleService.CreateOrUpdateTelegramUser(userID, userName, chatID)
 	suite.NoError(err)
 	suite.Equal(userFromRepo, userFromService)
+}
+
+func (suite *ServiceTestSuite) TestGetBaseUserID() {
+	tearDown := suite.SetupTest(suite.T())
+	defer tearDown()
+
+	var teleUserID int64 = 426
+	userFromRepo := &models.User{Model: gorm.Model{ID: 624}}
+	suite.teleRepo.EXPECT().GetUser(teleUserID).Return(userFromRepo, nil)
+
+	idFromService, err := suite.teleService.GetBaseUserID(teleUserID)
+	suite.NoError(err)
+	suite.Equal(userFromRepo.ID, idFromService)
 }
 
 func TestService(t *testing.T) {

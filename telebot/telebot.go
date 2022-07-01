@@ -18,4 +18,5 @@ func NewBot(settings telebot.Settings, hub *HandlersHub) (*telebot.Bot, error) {
 
 func RegisterHandlers(bot *telebot.Bot, hub *HandlersHub) {
 	bot.Handle("/start", hub.HandleStartCommand)
+	bot.Handle(telebot.OnText, hub.HandleText)
 }

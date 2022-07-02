@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"fmt"
+	billDAL "github.com/orenoid/telegram-account-bot/dal/bill"
 	"github.com/orenoid/telegram-account-bot/service/bill"
 	"github.com/orenoid/telegram-account-bot/service/telegram"
 	"github.com/pkg/errors"
@@ -41,7 +42,7 @@ func (hub *HandlersHub) HandleStartCommand(ctx telebot.Context) error {
 func (hub *HandlersHub) HandleText(ctx telebot.Context) error {
 	userState, err := hub.userStateManager.GetUserState(ctx.Sender().ID)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	switch userState.Type {
 	case Empty:
@@ -78,7 +79,9 @@ func (hub *HandlersHub) OnCreatingBill(ctx telebot.Context, userState *UserState
 	if err != nil {
 		return err
 	}
-	newBill, err := hub.billService.CreateNewBill(baseUserID, amount, *userState.BillCategory)
+	newBill, err := hub.billService.CreateNewBill(
+		baseUserID, amount, *userState.BillCategory, billDAL.CreateBillOptions{Name: userState.BillName},
+	)
 	if err != nil {
 		return err
 	}

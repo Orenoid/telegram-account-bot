@@ -262,7 +262,7 @@ func (suite *HandlersHubTestSuite) TestOnCreatingBill() {
 
 	defer func() { suite.True(createNewBill.called) }()
 	defer func() { suite.Equal(getBaseUserID.returnBaseUserID, createNewBill.paramUserID) }()
-	defer func() { suite.Equal(23.14, createNewBill.paramAmount) }()
+	defer func() { suite.Equal(-23.14, createNewBill.paramAmount) }()
 	defer func() { suite.Equal("娱乐", createNewBill.paramCategory) }()
 	defer func() { suite.Len(createNewBill.paramOpts, 1) }()
 	defer func() { suite.Equal("龙珠漫画", *createNewBill.paramOpts[0].Name) }()
@@ -304,4 +304,23 @@ func TestParseBill(t *testing.T) {
 	assert.Equal(t, "娱乐", category)
 	assert.NotNil(t, name)
 	assert.Equal(t, "欧卡2 后面的字符串也当作 name 的一部分", *name)
+}
+
+func TestParseAmount(t *testing.T) {
+	testCases := map[string]float64{
+		"+1.23": 1.23,
+		"1.23":  -1.23,
+		".2":    -0.2,
+	}
+	for text, expectedAmount := range testCases {
+		amount, err := parseAmount(text)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedAmount, amount)
+	}
+
+	badCases := []string{"", "+-1", "abc", "++2"}
+	for _, text := range badCases {
+		_, err := parseAmount(text)
+		assert.Error(t, err)
+	}
 }

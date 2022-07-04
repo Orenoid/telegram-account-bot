@@ -7,6 +7,7 @@ import (
 	"github.com/orenoid/telegram-account-bot/service/telegram"
 	"github.com/pkg/errors"
 	"gopkg.in/telebot.v3"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -70,9 +71,9 @@ func (hub *HandlersHub) OnEmpty(ctx telebot.Context) error {
 }
 
 func (hub *HandlersHub) OnCreatingBill(ctx telebot.Context, userState *UserState) error {
-	amount, err := strconv.ParseFloat(ctx.Text(), 64)
+	amount, err := parseAmount(ctx.Text())
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	sender := ctx.Sender()
 	baseUserID, err := hub.teleService.GetBaseUserID(sender.ID)
@@ -91,6 +92,26 @@ func (hub *HandlersHub) OnCreatingBill(ctx telebot.Context, userState *UserState
 	}
 	err = ctx.Send(&NewBillSender{newBill})
 	return errors.WithStack(err)
+}
+
+var validAmount = regexp.MustCompile("^([+-]?)([0-9]*\\.?[0-9]+)$")
+
+//parseAmount 解析数额，若前面不带 "+"，则默认会解析为负数（平时大多数时候为支出）
+func parseAmount(text string) (float64, error) {
+	matchResult := validAmount.FindStringSubmatch(text)
+	if len(matchResult) == 0 {
+		return 0, errors.Errorf("invalid amount text: %s", text)
+	} else if len(matchResult) == 3 {
+		amount, err := strconv.ParseFloat(matchResult[2], 64)
+		if err != nil {
+			return 0, errors.WithStack(err)
+		}
+		if matchResult[1] != "+" {
+			amount = -amount
+		}
+		return amount, nil
+	}
+	return 0, errors.Errorf("invalid amount text: %s", text)
 }
 
 func ParseBill(text string) (string, *string) {

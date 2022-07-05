@@ -23,6 +23,31 @@ func (template *BillCreatedTemplate) Render() string {
 	return fmt.Sprintf(format, template.bill.Amount.String(), template.bill.Category)
 }
 
+type MonthTitleTemplate struct {
+	Year  int
+	Month int
+}
+
+func (template *MonthTitleTemplate) Render() string {
+	return fmt.Sprintf("%d年%d月收支统计", template.Year, template.Month)
+}
+
+type DateTitleTemplate struct {
+	Year     int
+	Month    int
+	Day      int
+	ShowYear bool
+}
+
+func (template *DateTitleTemplate) Render() string {
+	if template.ShowYear {
+		return fmt.Sprintf("%d年%d月%d日收支统计", template.Year, template.Month, template.Day)
+	} else {
+		return fmt.Sprintf("%d月%d日收支统计", template.Month, template.Day)
+
+	}
+}
+
 type BillListTemplate struct {
 	Bills         []*models.Bill
 	MergeCategory bool // 对相同类别的账单求总和后展示

@@ -93,3 +93,16 @@ func TestBillListTemplate_Render(t *testing.T) {
 	template = BillListTemplate{Bills: nil}
 	assert.Equal(t, "暂无收支记录", template.Render())
 }
+
+func TestMonthTitleTemplate_Render(t *testing.T) {
+	template := &MonthTitleTemplate{Year: 2022, Month: 1}
+	assert.Equal(t, "2022年1月收支统计", template.Render())
+}
+
+func TestDateTitleTemplate_Render(t *testing.T) {
+	template := &DateTitleTemplate{2022, 12, 25, true}
+	assert.Equal(t, "2022年12月25日收支统计", template.Render())
+
+	template = &DateTitleTemplate{2022, 12, 25, false}
+	assert.Equal(t, "12月25日收支统计", template.Render())
+}

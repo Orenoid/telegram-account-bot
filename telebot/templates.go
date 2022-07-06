@@ -18,9 +18,15 @@ type BillCreatedTemplate struct {
 
 func (template *BillCreatedTemplate) Render() string {
 	format :=
-		`账单金额：%s 元，类别：%s
+		`%s：%s 元，类别：%s
 点击 "撤销" 可撤回该账单并回滚余额`
-	return fmt.Sprintf(format, template.bill.Amount.String(), template.bill.Category)
+	var inOrOut, amountStr string
+	if template.bill.Amount.LessThan(decimal.NewFromFloat(0)) {
+		inOrOut, amountStr = "支出", template.bill.Amount.Abs().String()
+	} else {
+		inOrOut, amountStr = "收入", template.bill.Amount.String()
+	}
+	return fmt.Sprintf(format, inOrOut, amountStr, template.bill.Category)
 }
 
 type MonthTitleTemplate struct {

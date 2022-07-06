@@ -6,6 +6,9 @@ import (
 	"gopkg.in/telebot.v3"
 )
 
+var _ telebot.Sendable = (*NewBillSender)(nil)
+var _ telebot.Sendable = (*DateBillsSender)(nil)
+
 type NewBillSender struct {
 	bill *models.Bill
 }
@@ -23,4 +26,16 @@ func (sender *NewBillSender) Send(bot *telebot.Bot, recipient telebot.Recipient,
 		},
 	}
 	return bot.Send(recipient, template.Render(), opts)
+}
+
+type DateBillsSender struct {
+	Bills            []*models.Bill
+	Year, Month, Day int
+	ShowYear         bool
+}
+
+func (sender *DateBillsSender) Send(bot *telebot.Bot, recipient telebot.Recipient, _ *telebot.SendOptions) (*telebot.Message, error) {
+	titleTemplate := DateTitleTemplate{sender.Year, sender.Month, sender.Day, sender.ShowYear}
+	billsTemplate := BillListTemplate{Bills: sender.Bills, MergeCategory: false}
+	return bot.Send(recipient, titleTemplate.Render()+"\n\n"+billsTemplate.Render())
 }

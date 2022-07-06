@@ -53,3 +53,23 @@ func (mr *MockRepositoryMockRecorder) CreateBillAndUpdateUserBalance(userID, amo
 	varargs := append([]interface{}{userID, amount, category}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBillAndUpdateUserBalance", reflect.TypeOf((*MockRepository)(nil).CreateBillAndUpdateUserBalance), varargs...)
 }
+
+// GetUserBillsByCreateTime mocks base method.
+func (m *MockRepository) GetUserBillsByCreateTime(userID uint, opts ...GetUserBillsByCreateTimeOptions) ([]*models.Bill, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{userID}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetUserBillsByCreateTime", varargs...)
+	ret0, _ := ret[0].([]*models.Bill)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserBillsByCreateTime indicates an expected call of GetUserBillsByCreateTime.
+func (mr *MockRepositoryMockRecorder) GetUserBillsByCreateTime(userID interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{userID}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBillsByCreateTime", reflect.TypeOf((*MockRepository)(nil).GetUserBillsByCreateTime), varargs...)
+}

@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type HandlersHub struct {
@@ -38,6 +39,31 @@ func (hub *HandlersHub) HandleStartCommand(ctx telebot.Context) error {
 		return errors.WithStack(err)
 	}
 	return nil
+}
+
+func (hub *HandlersHub) HandleDayCommand(ctx telebot.Context) error {
+	sender := ctx.Sender()
+	now := time.Now()
+	begin, end := getDayRange(now)
+
+	baseUserID, err := hub.teleService.GetBaseUserID(sender.ID)
+	if err != nil {
+		return err
+	}
+	bills, err := hub.billService.GetUserBillsByCreateTime(baseUserID,
+		billDAL.GetUserBillsByCreateTimeOptions{GreaterThan: begin, GreaterOrEqual: true, LessThan: end})
+	if err != nil {
+		return err
+	}
+	return ctx.Send(&DateBillsSender{bills, now.Year(), int(now.Month()), now.Day(), false})
+}
+
+// 获取某个时刻当天的0点-24点范围
+func getDayRange(t time.Time) (time.Time, time.Time) {
+	begin := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	tomorrow := t.Add(24 * time.Hour)
+	end := time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 0, 0, 0, 0, tomorrow.Location())
+	return begin, end
 }
 
 func (hub *HandlersHub) HandleText(ctx telebot.Context) error {

@@ -18,6 +18,7 @@ import (
 	"gopkg.in/telebot.v3"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestNewHandlerHub(t *testing.T) {
@@ -323,4 +324,16 @@ func TestParseAmount(t *testing.T) {
 		_, err := parseAmount(text)
 		assert.Error(t, err)
 	}
+}
+
+func TestGetDayRange(t *testing.T) {
+	testTime := time.Date(2011, 1, 2, 9, 5, 7, 1234, time.UTC)
+	begin, end := getDayRange(testTime)
+	assert.Equal(t, time.Date(2011, 1, 2, 0, 0, 0, 0, time.UTC), begin)
+	assert.Equal(t, time.Date(2011, 1, 3, 0, 0, 0, 0, time.UTC), end)
+
+	testTime = time.Date(2011, 2, 28, 0, 0, 0, 0, time.UTC)
+	begin, end = getDayRange(testTime)
+	assert.Equal(t, time.Date(2011, 2, 28, 0, 0, 0, 0, time.UTC), begin)
+	assert.Equal(t, time.Date(2011, 3, 1, 0, 0, 0, 0, time.UTC), end)
 }

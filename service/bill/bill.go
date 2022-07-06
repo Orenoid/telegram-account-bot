@@ -23,6 +23,11 @@ func (receiver *Service) CreateNewBill(userID uint, amount float64, category str
 	return receiver.billRepo.CreateBillAndUpdateUserBalance(userID, amount, category, opts...)
 }
 
+// GetUserBillsByCreateTime 获取用户在指定时间范围内的账单列表，若 opts 为空，则返回账单（opts 只取列表第一个作为查询参数）
+func (receiver *Service) GetUserBillsByCreateTime(userID uint, opts ...bill.GetUserBillsByCreateTimeOptions) ([]*models.Bill, error) {
+	return receiver.billRepo.GetUserBillsByCreateTime(userID, opts...)
+}
+
 func NewService(billRepo bill.Repository, userRepo user.Repository) *Service {
 	return &Service{billRepo: billRepo, userRepo: userRepo}
 }

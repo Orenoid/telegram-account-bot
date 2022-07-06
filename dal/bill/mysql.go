@@ -56,6 +56,29 @@ func (receiver *mysqlRepo) CreateBillAndUpdateUserBalance(userID uint, amount fl
 	return newBill, nil
 }
 
+func (receiver *mysqlRepo) GetUserBillsByCreateTime(userID uint, opts ...GetUserBillsByCreateTimeOptions) ([]*models.Bill, error) {
+	var bills []*models.Bill
+	query := receiver.db.Where("user_id = ?", userID)
+	if len(opts) > 0 {
+		opt := opts[0]
+		if opt.GreaterOrEqual {
+			query = query.Where("created_at >= ?", opt.GreaterThan)
+		} else {
+			query = query.Where("created_at = ?", opt.GreaterThan)
+		}
+		if opt.LessOrEqual {
+			query = query.Where("created_at <= ?", opt.LessThan)
+		} else {
+			query = query.Where("created_at < ?", opt.LessThan)
+		}
+	}
+	result := query.Find(&bills)
+	if result.Error != nil {
+		return nil, errors.WithStack(result.Error)
+	}
+	return bills, nil
+}
+
 func NewMysqlRepo(dsn string) (*mysqlRepo, error) {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{DisableAutomaticPing: true})
 	if err != nil {

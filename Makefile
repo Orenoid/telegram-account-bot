@@ -47,6 +47,7 @@ test:
 	@GOARCH=amd64 go test -gcflags=all=-l -cover \
 		./service/...\
 		./conf/...\
-		./telebot/...
+		./telebot/...\
+		./cmd/...
 
 .PHONY: help version mock test

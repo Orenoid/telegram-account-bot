@@ -64,7 +64,7 @@ func TestBillListTemplate_Render(t *testing.T) {
        - 工资：10000 元
        - 咸鱼：150.02 元`, template.Render())
 
-	template = BillListTemplate{Bills: nil}
+	template = BillListTemplate{Bills: nil, ShowSub: true}
 	assert.Equal(t, "暂无收支记录", template.Render())
 
 	// 测试订单单独展示行为（按创建时间排序）
@@ -90,8 +90,43 @@ func TestBillListTemplate_Render(t *testing.T) {
        - 咸鱼：100.01 元
        - 工资：10000 元`, template.Render())
 
-	template = BillListTemplate{Bills: nil}
-	assert.Equal(t, "暂无收支记录", template.Render())
+	bills = []*models.Bill{
+		{Category: "饮食", Amount: decimal.NewFromFloat(-0.01)},
+		{Category: "工资", Amount: decimal.NewFromFloat(10000)},
+	}
+	template = BillListTemplate{Bills: bills, MergeCategory: false, ShowSub: true}
+	assert.Equal(t,
+		`合计支出：0.01 元
+
+       - 饮食：0.01 元
+
+合计收入：10000 元
+
+       - 工资：10000 元
+
+净增：9999.99 元`, template.Render())
+
+	bills = []*models.Bill{
+		{Category: "饮食", Amount: decimal.NewFromFloat(-0.01)},
+	}
+	template = BillListTemplate{Bills: bills, MergeCategory: false, ShowSub: true}
+	assert.Equal(t,
+		`合计支出：0.01 元
+
+       - 饮食：0.01 元
+
+净增：-0.01 元`, template.Render())
+
+	bills = []*models.Bill{
+		{Category: "工资", Amount: decimal.NewFromFloat(3000)},
+	}
+	template = BillListTemplate{Bills: bills, MergeCategory: false, ShowSub: true}
+	assert.Equal(t,
+		`合计收入：3000 元
+
+       - 工资：3000 元
+
+净增：3000 元`, template.Render())
 }
 
 func TestMonthTitleTemplate_Render(t *testing.T) {

@@ -57,6 +57,7 @@ func (template *DateTitleTemplate) Render() string {
 type BillListTemplate struct {
 	Bills         []*models.Bill
 	MergeCategory bool // 对相同类别的账单求总和后展示
+	ShowSub       bool // 显示净增值
 }
 
 func (template *BillListTemplate) Render() string {
@@ -65,11 +66,11 @@ func (template *BillListTemplate) Render() string {
 	}
 
 	result := &strings.Builder{}
-	expendSection := template.expendSection()
+	expendSection, expendSum := template.expendSection()
 	if len(expendSection) > 0 {
 		result.Write([]byte(expendSection))
 	}
-	incomeSection := template.incomeSection()
+	incomeSection, incomeSum := template.incomeSection()
 	if len(expendSection) > 0 && len(incomeSection) > 0 {
 		// 支出与收入记录之间多间隔一行
 		result.Write([]byte("\n\n"))
@@ -77,12 +78,16 @@ func (template *BillListTemplate) Render() string {
 	if len(incomeSection) > 0 {
 		result.Write([]byte(incomeSection))
 	}
+	if template.ShowSub {
+		sub := incomeSum.Add(expendSum)
+		result.Write([]byte(fmt.Sprintf("\n\n净增：%s 元", sub.String())))
+	}
 
 	return result.String()
 }
 
 // expendSection 支出记录
-func (template *BillListTemplate) expendSection() string {
+func (template *BillListTemplate) expendSection() (sectionText string, sum decimal.Decimal) {
 	expendSum := decimal.NewFromFloat(0)
 	categoryMapping := map[string]decimal.Decimal{}
 	var expendBills []*models.Bill
@@ -96,7 +101,7 @@ func (template *BillListTemplate) expendSection() string {
 		}
 	}
 	if len(expendBills) == 0 {
-		return ""
+		return "", decimal.Decimal{}
 	}
 
 	result := &strings.Builder{}
@@ -124,11 +129,11 @@ func (template *BillListTemplate) expendSection() string {
 			}
 		}
 	}
-	return result.String()
+	return result.String(), expendSum
 }
 
 // incomeSection 收入记录
-func (template *BillListTemplate) incomeSection() string {
+func (template *BillListTemplate) incomeSection() (sectionText string, sum decimal.Decimal) {
 	var incomeBills []*models.Bill
 	incomeSum := decimal.NewFromFloat(0)
 	categoryMapping := map[string]decimal.Decimal{}
@@ -142,7 +147,7 @@ func (template *BillListTemplate) incomeSection() string {
 		}
 	}
 	if len(incomeBills) == 0 {
-		return ""
+		return "", decimal.Decimal{}
 	}
 
 	result := &strings.Builder{}
@@ -172,7 +177,7 @@ func (template *BillListTemplate) incomeSection() string {
 			}
 		}
 	}
-	return result.String()
+	return result.String(), incomeSum
 }
 
 func (template *BillListTemplate) getSortedCategories(categoriesMapping map[string]decimal.Decimal) []string {

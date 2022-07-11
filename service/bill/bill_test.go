@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 	"math/rand"
 	"testing"
+	"time"
 )
 
 func TestNewService(t *testing.T) {
@@ -98,6 +99,21 @@ func (suite *BillServiceTestSuite) TestCreateBillIfUserNotFound() {
 	returnedBill, err := suite.billService.CreateNewBill(userID, 0, "")
 	suite.ErrorContains(err, "user not exists")
 	suite.Nil(returnedBill)
+}
+
+func (suite *BillServiceTestSuite) TestGetBillsByCreateTime() {
+	tearDown := suite.SetupTest(suite.T())
+	defer tearDown()
+
+	var userID uint = 99
+	optsSlice := []bill.GetUserBillsByCreateTimeOptions{{GreaterThan: time.Now(), LessThan: time.Now().Add(10 * time.Second)}}
+
+	repoReturnBills := []*models.Bill{{UserID: 99, Amount: decimal.NewFromFloat(9)}}
+	suite.billRepo.EXPECT().GetUserBillsByCreateTime(userID, optsSlice[0]).Return(repoReturnBills, nil)
+
+	bills, err := suite.billService.GetUserBillsByCreateTime(userID, optsSlice...)
+	suite.NoError(err)
+	suite.Equal(repoReturnBills, bills)
 }
 
 func TestBillServiceSuite(t *testing.T) {

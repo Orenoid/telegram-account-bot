@@ -39,3 +39,14 @@ func (sender *DateBillsSender) Send(bot *telebot.Bot, recipient telebot.Recipien
 	billsTemplate := BillListTemplate{Bills: sender.Bills, MergeCategory: false}
 	return bot.Send(recipient, titleTemplate.Render()+"\n\n"+billsTemplate.Render())
 }
+
+type MonthBillsSender struct {
+	Bills       []*models.Bill
+	Year, Month int
+}
+
+func (sender *MonthBillsSender) Send(bot *telebot.Bot, recipient telebot.Recipient, _ *telebot.SendOptions) (*telebot.Message, error) {
+	titleTemplate := MonthTitleTemplate{Year: sender.Year, Month: sender.Month}
+	billsTemplate := BillListTemplate{Bills: sender.Bills, MergeCategory: true}
+	return bot.Send(recipient, titleTemplate.Render()+"\n\n"+billsTemplate.Render())
+}

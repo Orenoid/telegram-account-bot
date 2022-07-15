@@ -49,6 +49,7 @@ func TestRegisterHandlers(t *testing.T) {
 	expectedRegistered := map[interface{}]telebot.HandlerFunc{
 		"/start":       hub.HandleStartCommand,
 		"/day":         hub.HandleDayCommand,
+		"/month":       hub.HandleMonthCommand,
 		telebot.OnText: hub.HandleText,
 	}
 	defer patches.Reset()

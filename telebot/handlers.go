@@ -66,6 +66,33 @@ func getDayRange(t time.Time) (time.Time, time.Time) {
 	return begin, end
 }
 
+func (hub HandlersHub) HandleMonthCommand(ctx telebot.Context) error {
+	sender := ctx.Sender()
+	now := time.Now()
+	begin, end := getMonthRange(now)
+
+	baseUserID, err := hub.teleService.GetBaseUserID(sender.ID)
+	if err != nil {
+		return err
+	}
+	bills, err := hub.billService.GetUserBillsByCreateTime(baseUserID,
+		billDAL.GetUserBillsByCreateTimeOptions{GreaterThan: begin, GreaterOrEqual: true, LessThan: end})
+	if err != nil {
+		return err
+	}
+	var sendable telebot.Sendable = &MonthBillsSender{Bills: bills, Year: now.Year(), Month: int(now.Month())}
+	return ctx.Send(sendable)
+}
+
+func getMonthRange(t time.Time) (time.Time, time.Time) {
+	currentYear, currentMonth, _ := t.Date()
+	currentLocation := t.Location()
+
+	firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
+	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
+	return firstOfMonth, lastOfMonth
+}
+
 func (hub *HandlersHub) HandleText(ctx telebot.Context) error {
 	userState, err := hub.userStateManager.GetUserState(ctx.Sender().ID)
 	if err != nil {

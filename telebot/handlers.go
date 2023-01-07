@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"encoding/json"
 	"fmt"
 	billDAL "github.com/orenoid/telegram-account-bot/dal/bill"
 	"github.com/orenoid/telegram-account-bot/service/bill"
@@ -66,7 +67,7 @@ func getDayRange(t time.Time) (time.Time, time.Time) {
 	return begin, end
 }
 
-func (hub HandlersHub) HandleMonthCommand(ctx telebot.Context) error {
+func (hub *HandlersHub) HandleMonthCommand(ctx telebot.Context) error {
 	sender := ctx.Sender()
 	now := time.Now()
 	begin, end := getMonthRange(now)
@@ -177,4 +178,37 @@ func ParseBill(text string) (string, *string) {
 		category, name = ss[0], ss[1]
 		return category, &name
 	}
+}
+
+// HandleDayBillSelectionCallback 处理切换日期账单的回调事件
+func (hub *HandlersHub) HandleDayBillSelectionCallback(ctx telebot.Context) error {
+	// 解析回调按钮的日期
+	callback := ctx.Callback()
+	if callback == nil {
+		return nil
+	}
+	data := DayBillBtnData{}
+	err := json.Unmarshal([]byte(callback.Data), &data)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	// 查询当日账单
+	baseUserID, err := hub.teleService.GetBaseUserID(callback.Sender.ID)
+	if err != nil {
+		return err
+	}
+	date := time.Date(data.Year, time.Month(data.Month), data.Day, 0, 0, 0, 0, time.Local)
+	begin, end := getDayRange(date)
+	bills, err := hub.billService.GetUserBillsByCreateTime(baseUserID,
+		billDAL.GetUserBillsByCreateTimeOptions{GreaterThan: begin, GreaterOrEqual: true, LessThan: end})
+	if err != nil {
+		return err
+	}
+	// 更新消息，切换账单
+	sender := &DateBillsSender{bills, data.Year, data.Month, data.Day, false}
+	err = ctx.Edit(sender.Text(), sender.ReplyMarkup())
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }

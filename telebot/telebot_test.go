@@ -47,10 +47,12 @@ func TestRegisterHandlers(t *testing.T) {
 		realRegistered[endpoint] = h
 	})
 	expectedRegistered := map[interface{}]telebot.HandlerFunc{
-		"/start":       hub.HandleStartCommand,
-		"/day":         hub.HandleDayCommand,
-		"/month":       hub.HandleMonthCommand,
-		telebot.OnText: hub.HandleText,
+		"/start":            hub.HandleStartCommand,
+		"/day":              hub.HandleDayCommand,
+		"/month":            hub.HandleMonthCommand,
+		telebot.OnText:      hub.HandleText,
+		&prevDayBillBtnTmpl: hub.HandleDayBillSelectionCallback,
+		&nextDayBillBtnTmpl: hub.HandleDayBillSelectionCallback,
 	}
 	defer patches.Reset()
 	RegisterHandlers(bot, hub)

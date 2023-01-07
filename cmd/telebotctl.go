@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-// TODO 单元测试
-
 var cmd = &cobra.Command{
 	Use:   "telebotctl",
 	Short: "telebotctl - start the telegram bot",

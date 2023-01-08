@@ -79,6 +79,39 @@ func (receiver *mysqlRepo) GetUserBillsByCreateTime(userID uint, opts ...GetUser
 	return bills, nil
 }
 
+func (receiver *mysqlRepo) DeleteBillAndUpdateUserBalance(billID uint) error {
+	err := receiver.db.Transaction(func(tx *gorm.DB) error {
+		// 删除订单
+		billModel := &models.Bill{}
+		result := tx.Where("id = ?", billID).First(billModel)
+		if result.Error != nil {
+			return errors.WithStack(result.Error)
+		}
+		result = tx.Delete(billModel)
+		if result.Error != nil {
+			return errors.WithStack(result.Error)
+		}
+		// 更新用户余额
+		userModel := &models.User{}
+		result = tx.Where("id = ?", billModel.UserID).First(userModel)
+		if result.Error != nil {
+			return errors.WithStack(result.Error)
+		}
+		if userModel.Balance.Valid {
+			userModel.Balance.Decimal = userModel.Balance.Decimal.Sub(billModel.Amount)
+			result := tx.Save(userModel)
+			if result.Error != nil {
+				return errors.WithStack(result.Error)
+			}
+			if result.RowsAffected != 1 {
+				return errors.New("failed to update user balance")
+			}
+		}
+		return nil
+	})
+	return err
+}
+
 func NewMysqlRepo(dsn string) (*mysqlRepo, error) {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{DisableAutomaticPing: true})
 	if err != nil {

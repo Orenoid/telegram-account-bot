@@ -28,6 +28,11 @@ func (receiver *Service) GetUserBillsByCreateTime(userID uint, opts ...bill.GetU
 	return receiver.billRepo.GetUserBillsByCreateTime(userID, opts...)
 }
 
+// CancelBillAndUpdateUserBalance 取消订单并更新用户余额
+func (receiver *Service) CancelBillAndUpdateUserBalance(billID uint) error {
+	return receiver.billRepo.DeleteBillAndUpdateUserBalance(billID)
+}
+
 func NewService(billRepo bill.Repository, userRepo user.Repository) *Service {
 	return &Service{billRepo: billRepo, userRepo: userRepo}
 }

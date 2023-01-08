@@ -10,6 +10,8 @@ type Repository interface {
 	CreateBillAndUpdateUserBalance(userID uint, amount float64, category string, opts ...CreateBillOptions) (*models.Bill, error)
 	// GetUserBillsByCreateTime 获取用户在指定时间范围内的账单列表，若 opts 为空，则返回账单（opts 只取列表第一个作为查询参数）
 	GetUserBillsByCreateTime(userID uint, opts ...GetUserBillsByCreateTimeOptions) ([]*models.Bill, error)
+	// DeleteBillAndUpdateUserBalance 删除订单并更新用户余额
+	DeleteBillAndUpdateUserBalance(billID uint) error
 }
 
 type CreateBillOptions struct {

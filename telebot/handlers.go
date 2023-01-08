@@ -212,3 +212,21 @@ func (hub *HandlersHub) HandleDayBillSelectionCallback(ctx telebot.Context) erro
 	}
 	return nil
 }
+
+func (hub *HandlersHub) HandleCancelBillCallback(ctx telebot.Context) error {
+	callback := ctx.Callback()
+	if callback == nil {
+		return nil
+	}
+	data := CancelBillData{}
+	err := json.Unmarshal([]byte(callback.Data), &data)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	err = hub.billService.CancelBillAndUpdateUserBalance(data.BillID)
+	if err != nil {
+		return err
+	}
+	err = ctx.Edit("已撤销账单并回滚余额")
+	return errors.WithStack(err)
+}

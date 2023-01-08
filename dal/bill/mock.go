@@ -54,6 +54,20 @@ func (mr *MockRepositoryMockRecorder) CreateBillAndUpdateUserBalance(userID, amo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBillAndUpdateUserBalance", reflect.TypeOf((*MockRepository)(nil).CreateBillAndUpdateUserBalance), varargs...)
 }
 
+// DeleteBillAndUpdateUserBalance mocks base method.
+func (m *MockRepository) DeleteBillAndUpdateUserBalance(billID uint) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteBillAndUpdateUserBalance", billID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteBillAndUpdateUserBalance indicates an expected call of DeleteBillAndUpdateUserBalance.
+func (mr *MockRepositoryMockRecorder) DeleteBillAndUpdateUserBalance(billID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBillAndUpdateUserBalance", reflect.TypeOf((*MockRepository)(nil).DeleteBillAndUpdateUserBalance), billID)
+}
+
 // GetUserBillsByCreateTime mocks base method.
 func (m *MockRepository) GetUserBillsByCreateTime(userID uint, opts ...GetUserBillsByCreateTimeOptions) ([]*models.Bill, error) {
 	m.ctrl.T.Helper()

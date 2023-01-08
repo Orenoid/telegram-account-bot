@@ -9,6 +9,7 @@ import (
 var (
 	prevDayBillBtnTmpl = telebot.Btn{Text: "<️", Unique: "dayBillSelectorBtn"}
 	nextDayBillBtnTmpl = telebot.Btn{Text: ">️", Unique: "dayBillSelectorBtn"}
+	cancelBillBtnTmpl  = telebot.Btn{Text: "撤销", Unique: "cancelBillBtn"}
 )
 
 type DayBillBtnData struct {
@@ -37,6 +38,21 @@ func NextDayBillBtn(year, month, day int) telebot.Btn {
 	return telebot.Btn{
 		Text:   nextDayBillBtnTmpl.Text,
 		Unique: nextDayBillBtnTmpl.Unique,
+		Data:   string(dataRaw),
+	}
+}
+
+type CancelBillData struct {
+	BillID uint
+}
+
+// CancelBillBtn 构造用于取消某个订单的按钮
+func CancelBillBtn(billID uint) telebot.Btn {
+	data := &CancelBillData{billID}
+	dataRaw, _ := json.Marshal(data)
+	return telebot.Btn{
+		Text:   cancelBillBtnTmpl.Text,
+		Unique: cancelBillBtnTmpl.Unique,
 		Data:   string(dataRaw),
 	}
 }

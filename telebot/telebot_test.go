@@ -53,6 +53,7 @@ func TestRegisterHandlers(t *testing.T) {
 		telebot.OnText:      hub.HandleText,
 		&prevDayBillBtnTmpl: hub.HandleDayBillSelectionCallback,
 		&nextDayBillBtnTmpl: hub.HandleDayBillSelectionCallback,
+		&cancelBillBtnTmpl:  hub.HandleCancelBillCallback,
 	}
 	defer patches.Reset()
 	RegisterHandlers(bot, hub)

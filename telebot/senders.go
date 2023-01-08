@@ -17,15 +17,10 @@ func (sender *NewBillSender) Send(bot *telebot.Bot, recipient telebot.Recipient,
 	if sender.bill == nil {
 		return nil, errors.New("bill should be nil")
 	}
-	// TODO 撤销功能
 	template := &BillCreatedTemplate{sender.bill}
-	button := telebot.InlineButton{Unique: "cancelBill", Text: "撤销"}
-	opts := &telebot.SendOptions{
-		ReplyMarkup: &telebot.ReplyMarkup{
-			InlineKeyboard: [][]telebot.InlineButton{{button}},
-		},
-	}
-	return bot.Send(recipient, template.Render(), opts)
+	menu := &telebot.ReplyMarkup{}
+	menu.Inline(menu.Row(CancelBillBtn(sender.bill.ID)))
+	return bot.Send(recipient, template.Render(), menu)
 }
 
 type DateBillsSender struct {

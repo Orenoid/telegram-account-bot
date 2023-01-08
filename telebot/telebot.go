@@ -25,4 +25,5 @@ func RegisterHandlers(bot *telebot.Bot, hub *HandlersHub) {
 	// 回调
 	bot.Handle(&prevDayBillBtnTmpl, hub.HandleDayBillSelectionCallback)
 	bot.Handle(&nextDayBillBtnTmpl, hub.HandleDayBillSelectionCallback)
+	bot.Handle(&cancelBillBtnTmpl, hub.HandleCancelBillCallback)
 }

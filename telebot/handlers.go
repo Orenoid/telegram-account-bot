@@ -85,6 +85,19 @@ func (hub *HandlersHub) HandleMonthCommand(ctx telebot.Context) error {
 	return ctx.Send(sendable)
 }
 
+func (hub *HandlersHub) HandleCancelCommand(ctx telebot.Context) error {
+	sender := ctx.Sender()
+	if sender == nil {
+		return nil
+	}
+	err := hub.userStateManager.ClearUserState(sender.ID)
+	if err != nil {
+		return err
+	}
+	err = ctx.Send("已取消")
+	return err
+}
+
 func getMonthRange(t time.Time) (time.Time, time.Time) {
 	currentYear, currentMonth, _ := t.Date()
 	currentLocation := t.Location()
@@ -120,7 +133,7 @@ func (hub *HandlersHub) OnEmpty(ctx telebot.Context) error {
 	if err != nil {
 		return err
 	}
-	err = ctx.Send(fmt.Sprintf("账单类别：%s，请输入账单金额", category))
+	err = ctx.Send(fmt.Sprintf("账单类别：%s，请输入账单金额\n默认记做支出，若想记为收入，可在金额前带上\"+\"号\n若想取消本次操作，请输入 /cancel", category))
 	return errors.WithStack(err)
 }
 

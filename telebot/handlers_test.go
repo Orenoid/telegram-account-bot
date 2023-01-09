@@ -191,7 +191,7 @@ func (suite *HandlersHubTestSuite) TestOnEmpty() {
 	ctx.EXPECT().Sender().Return(&telebot.User{ID: 6379})
 	suite.userStateManager.EXPECT().SetUserState(int64(6379),
 		&UserState{CreatingBill, &parseBillPatchesHelper.category, parseBillPatchesHelper.name}).Times(1)
-	ctx.EXPECT().Send(fmt.Sprintf("账单类别：%s，请输入账单金额", parseBillPatchesHelper.category)).Times(1)
+	ctx.EXPECT().Send(fmt.Sprintf("账单类别：%s，请输入账单金额\n默认记做支出，若想记为收入，可在金额前带上\"+\"号\n若想取消本次操作，请输入 /cancel", parseBillPatchesHelper.category)).Times(1)
 
 	err := suite.hub.OnEmpty(ctx)
 

@@ -21,6 +21,7 @@ func RegisterHandlers(bot *telebot.Bot, hub *HandlersHub) {
 	bot.Handle("/start", hub.HandleStartCommand)
 	bot.Handle("/day", hub.HandleDayCommand)
 	bot.Handle("/month", hub.HandleMonthCommand)
+	bot.Handle("/cancel", hub.HandleCancelCommand)
 	bot.Handle(telebot.OnText, hub.HandleText)
 	// 回调
 	bot.Handle(&prevDayBillBtnTmpl, hub.HandleDayBillSelectionCallback)

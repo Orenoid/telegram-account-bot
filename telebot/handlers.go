@@ -226,6 +226,38 @@ func (hub *HandlersHub) HandleDayBillSelectionCallback(ctx telebot.Context) erro
 	return nil
 }
 
+// HandleMonthBillSelectionCallback 处理切换月度账单的回调事件
+func (hub *HandlersHub) HandleMonthBillSelectionCallback(ctx telebot.Context) error {
+	callback := ctx.Callback()
+	if callback == nil {
+		return nil
+	}
+	data := MonthBillBtnData{}
+	err := json.Unmarshal([]byte(callback.Data), &data)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	// 查询月度账单
+	baseUserID, err := hub.teleService.GetBaseUserID(callback.Sender.ID)
+	if err != nil {
+		return err
+	}
+	date := time.Date(data.Year, time.Month(data.Month), 1, 0, 0, 0, 0, time.Local)
+	begin, end := getMonthRange(date)
+	bills, err := hub.billService.GetUserBillsByCreateTime(baseUserID,
+		billDAL.GetUserBillsByCreateTimeOptions{GreaterThan: begin, GreaterOrEqual: true, LessThan: end})
+	if err != nil {
+		return err
+	}
+	// 更新消息，切换账单
+	sender := &MonthBillsSender{bills, data.Year, data.Month}
+	err = ctx.Edit(sender.Text(), sender.ReplyMarkup())
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
 func (hub *HandlersHub) HandleCancelBillCallback(ctx telebot.Context) error {
 	callback := ctx.Callback()
 	if callback == nil {

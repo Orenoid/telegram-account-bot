@@ -10,6 +10,8 @@ var (
 	prevDayBillBtnTmpl = telebot.Btn{Text: "<️", Unique: "dayBillSelectorBtn"}
 	nextDayBillBtnTmpl = telebot.Btn{Text: ">️", Unique: "dayBillSelectorBtn"}
 	cancelBillBtnTmpl  = telebot.Btn{Text: "撤销", Unique: "cancelBillBtn"}
+	prevMonthBtnTmpl   = telebot.Btn{Text: "<", Unique: "monthBillSelectorBtn"}
+	nextMonthBtnTmpl   = telebot.Btn{Text: ">", Unique: "monthBillSelectorBtn"}
 )
 
 type DayBillBtnData struct {
@@ -38,6 +40,34 @@ func NextDayBillBtn(year, month, day int) telebot.Btn {
 	return telebot.Btn{
 		Text:   nextDayBillBtnTmpl.Text,
 		Unique: nextDayBillBtnTmpl.Unique,
+		Data:   string(dataRaw),
+	}
+}
+
+type MonthBillBtnData struct {
+	Year, Month int
+}
+
+func PrevMonthBillBtn(year, month int) telebot.Btn {
+	date := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Local)
+	prevMonthDate := date.AddDate(0, -1, 0)
+	data := &MonthBillBtnData{Year: prevMonthDate.Year(), Month: int(prevMonthDate.Month())}
+	dataRaw, _ := json.Marshal(data)
+	return telebot.Btn{
+		Text:   prevMonthBtnTmpl.Text,
+		Unique: prevMonthBtnTmpl.Unique,
+		Data:   string(dataRaw),
+	}
+}
+
+func NextMonthBillBtn(year, month int) telebot.Btn {
+	date := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Local)
+	nextMonthDate := date.AddDate(0, 1, 0)
+	data := &MonthBillBtnData{Year: nextMonthDate.Year(), Month: int(nextMonthDate.Month())}
+	dataRaw, _ := json.Marshal(data)
+	return telebot.Btn{
+		Text:   nextMonthBtnTmpl.Text,
+		Unique: nextMonthBtnTmpl.Unique,
 		Data:   string(dataRaw),
 	}
 }

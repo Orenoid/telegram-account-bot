@@ -54,7 +54,20 @@ type MonthBillsSender struct {
 }
 
 func (sender *MonthBillsSender) Send(bot *telebot.Bot, recipient telebot.Recipient, _ *telebot.SendOptions) (*telebot.Message, error) {
+	return bot.Send(recipient, sender.Text(), sender.ReplyMarkup())
+}
+
+func (sender *MonthBillsSender) Text() string {
 	titleTemplate := MonthTitleTemplate{Year: sender.Year, Month: sender.Month}
 	billsTemplate := BillListTemplate{Bills: sender.Bills, MergeCategory: true}
-	return bot.Send(recipient, titleTemplate.Render()+"\n\n"+billsTemplate.Render())
+	return titleTemplate.Render() + "\n\n" + billsTemplate.Render()
+}
+
+func (sender *MonthBillsSender) ReplyMarkup() *telebot.ReplyMarkup {
+	selector := &telebot.ReplyMarkup{ResizeKeyboard: true}
+	selector.Inline(selector.Row(
+		PrevMonthBillBtn(sender.Year, sender.Month),
+		NextMonthBillBtn(sender.Year, sender.Month),
+	))
+	return selector
 }

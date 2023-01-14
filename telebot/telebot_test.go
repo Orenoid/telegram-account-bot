@@ -51,6 +51,7 @@ func TestRegisterHandlers(t *testing.T) {
 		"/day":              hub.HandleDayCommand,
 		"/month":            hub.HandleMonthCommand,
 		"/cancel":           hub.HandleCancelCommand,
+		"/set_keyboard":     hub.HandleSetKeyboardCommand,
 		telebot.OnText:      hub.HandleText,
 		&prevDayBillBtnTmpl: hub.HandleDayBillSelectionCallback,
 		&nextDayBillBtnTmpl: hub.HandleDayBillSelectionCallback,

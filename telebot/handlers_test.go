@@ -78,7 +78,19 @@ func (suite *HandlersHubTestSuite) TestHandleStartCommand() {
 
 	ctx.EXPECT().Chat().Return(&telebot.Chat{ID: 592371906012}).Times(1)
 	ctx.EXPECT().Sender().Return(&telebot.User{ID: 417714530102, Username: "JustARandomName"}).Times(1)
-	ctx.EXPECT().Send("hello")
+	ctx.EXPECT().Send("hello", &telebot.ReplyMarkup{
+		ReplyKeyboard: [][]telebot.ReplyButton{
+			{
+				{Text: "饮食"}, {Text: "出行"}, {Text: "杂项"},
+			},
+			{
+				{Text: "娱乐"}, {Text: "购物"},
+			},
+			{
+				{Text: "工资"},
+			},
+		},
+	})
 
 	type MethodParams struct {
 		userID   int64

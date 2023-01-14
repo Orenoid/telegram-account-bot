@@ -8,8 +8,9 @@ import (
 type UserStateType string
 
 const (
-	Empty        UserStateType = "empty"
-	CreatingBill UserStateType = "creatingBill"
+	Empty           UserStateType = "empty"
+	CreatingBill    UserStateType = "creatingBill"
+	SettingKeyboard UserStateType = "settingKeyboard"
 )
 
 type UserState struct {

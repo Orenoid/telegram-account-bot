@@ -34,8 +34,8 @@ func (hub *HandlersHub) HandleStartCommand(ctx telebot.Context) error {
 	if err != nil {
 		return err
 	}
-	// TODO set default keyboard
-	err = ctx.Send("hello") // TODO send help message
+	defaultKeyboard := textToKeyboard("饮食,出行,杂项|娱乐,购物|工资")
+	err = ctx.Send("hello", &telebot.ReplyMarkup{ReplyKeyboard: defaultKeyboard}) // TODO send help message
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -57,6 +57,21 @@ func (hub *HandlersHub) HandleDayCommand(ctx telebot.Context) error {
 		return err
 	}
 	return ctx.Send(&DateBillsSender{bills, now.Year(), int(now.Month()), now.Day(), false})
+}
+
+func (hub *HandlersHub) HandleSetKeyboardCommand(ctx telebot.Context) error {
+	sender := ctx.Sender()
+	if sender == nil {
+		return nil
+	}
+	// 记录用户状态
+	err := hub.userStateManager.SetUserState(sender.ID, &UserState{Type: SettingKeyboard})
+	if err != nil {
+		return err
+	}
+	// 发送提示信息
+	err = ctx.Send("快捷键盘用于设置一些日常生活中的支出/收入类别，用于快速记录\n\n请按照以下格式输入你想要设置的快捷键盘，例如：\n\n饮食,出行,杂项|娱乐,购物|工资,基金\n\n其中\"｜\"表示换行，在上面的例子中，则表示设置一个三行的快捷键盘，第一行设置了「饮食」、「出行」、「杂项」三个账单类别，以此类推")
+	return errors.WithStack(err)
 }
 
 // 获取某个时刻当天的0点-24点范围
@@ -117,6 +132,8 @@ func (hub *HandlersHub) HandleText(ctx telebot.Context) error {
 		return hub.OnEmpty(ctx)
 	case CreatingBill:
 		return hub.OnCreatingBill(ctx, userState)
+	case SettingKeyboard:
+		return hub.OnSettingKeyboard(ctx)
 	}
 	return nil
 }
@@ -191,6 +208,32 @@ func ParseBill(text string) (string, *string) {
 		category, name = ss[0], ss[1]
 		return category, &name
 	}
+}
+
+func (hub *HandlersHub) OnSettingKeyboard(ctx telebot.Context) error {
+	keyboardStr := ctx.Text()
+	keyboard := textToKeyboard(keyboardStr)
+	err := hub.userStateManager.ClearUserState(ctx.Sender().ID)
+	if err != nil {
+		return err
+	}
+	err = ctx.Send("已设置", &telebot.ReplyMarkup{ReplyKeyboard: keyboard})
+	return errors.WithStack(err)
+}
+
+func textToKeyboard(text string) [][]telebot.ReplyButton {
+	var result [][]telebot.ReplyButton
+	rows := strings.Split(text, "|")
+	for _, rowStr := range rows {
+		categories := strings.Split(rowStr, ",")
+		btnsInRow := make([]telebot.ReplyButton, 0, len(categories))
+		for _, category := range categories {
+			btn := telebot.ReplyButton{Text: category}
+			btnsInRow = append(btnsInRow, btn)
+		}
+		result = append(result, btnsInRow)
+	}
+	return result
 }
 
 // HandleDayBillSelectionCallback 处理切换日期账单的回调事件

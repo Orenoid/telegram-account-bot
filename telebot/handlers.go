@@ -6,6 +6,7 @@ import (
 	billDAL "github.com/orenoid/telegram-account-bot/dal/bill"
 	"github.com/orenoid/telegram-account-bot/service/bill"
 	"github.com/orenoid/telegram-account-bot/service/telegram"
+	"github.com/orenoid/telegram-account-bot/service/user"
 	"github.com/pkg/errors"
 	"gopkg.in/telebot.v3"
 	"regexp"
@@ -17,11 +18,12 @@ import (
 type HandlersHub struct {
 	teleService      *telegram.Service
 	billService      *bill.Service
+	userService      *user.Service
 	userStateManager UserStateManager
 }
 
-func NewHandlerHub(billService *bill.Service, teleService *telegram.Service, userStateManager UserStateManager) *HandlersHub {
-	return &HandlersHub{billService: billService, teleService: teleService, userStateManager: userStateManager}
+func NewHandlerHub(billService *bill.Service, teleService *telegram.Service, userService *user.Service, userStateManager UserStateManager) *HandlersHub {
+	return &HandlersHub{billService: billService, teleService: teleService, userService: userService, userStateManager: userStateManager}
 }
 
 const helpMessage = `欢迎使用记账机器人！
@@ -346,5 +348,26 @@ func (hub *HandlersHub) HandleCancelBillCallback(ctx telebot.Context) error {
 		return err
 	}
 	err = ctx.Edit("已撤销账单")
+	return errors.WithStack(err)
+}
+
+func (hub *HandlersHub) HandleSetBalanceCommand(ctx telebot.Context) error {
+	sender := ctx.Sender()
+	if sender == nil {
+		return nil
+	}
+	amount, err := strconv.ParseFloat(strings.TrimSpace(strings.TrimPrefix(ctx.Text(), "/set_balance")), 64)
+	if err != nil {
+		return err
+	}
+	baseUserID, err := hub.teleService.GetBaseUserID(sender.ID)
+	if err != nil {
+		return err
+	}
+	amount, err = hub.userService.SetUserBalance(baseUserID, amount)
+	if err != nil {
+		return err
+	}
+	err = ctx.Send(fmt.Sprintf("已将您的余额设置为 %.2f", amount))
 	return errors.WithStack(err)
 }

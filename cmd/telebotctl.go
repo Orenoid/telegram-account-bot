@@ -8,6 +8,7 @@ import (
 	userdal "github.com/orenoid/telegram-account-bot/dal/user"
 	billservice "github.com/orenoid/telegram-account-bot/service/bill"
 	teleservice "github.com/orenoid/telegram-account-bot/service/telegram"
+	"github.com/orenoid/telegram-account-bot/service/user"
 	"github.com/orenoid/telegram-account-bot/telebot"
 	"github.com/spf13/cobra"
 	tele "gopkg.in/telebot.v3"
@@ -43,10 +44,11 @@ var cmd = &cobra.Command{
 
 		teleService := teleservice.NewService(teleRepo)
 		billService := billservice.NewService(billRepo, userRepo)
+		userService := user.NewUserService(userRepo)
 
 		telegramUserStateManager := telebot.NewInMemoryUserStateManager()
 
-		hub := telebot.NewHandlerHub(billService, teleService, telegramUserStateManager)
+		hub := telebot.NewHandlerHub(billService, teleService, userService, telegramUserStateManager)
 		bot, err := telebot.NewBot(settings, hub)
 		if err != nil {
 			panic(err)

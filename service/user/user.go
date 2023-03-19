@@ -29,6 +29,6 @@ func (receiver *Service) SetUserBalance(userID uint, balance float64) (float64, 
 	return newBalance, nil
 }
 
-func NewUserService(userRepo user.Repository) (*Service, error) {
-	return &Service{userRepo: userRepo}, nil
+func NewUserService(userRepo user.Repository) *Service {
+	return &Service{userRepo: userRepo}
 }

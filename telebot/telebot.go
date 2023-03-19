@@ -18,6 +18,7 @@ func NewBot(settings telebot.Settings, hub *HandlersHub) (*telebot.Bot, error) {
 
 func RegisterHandlers(bot *telebot.Bot, hub *HandlersHub) {
 	// 基础命令
+	bot.Handle("/help", hub.HandleHelpCommand)
 	bot.Handle("/start", hub.HandleStartCommand)
 	bot.Handle("/day", hub.HandleDayCommand)
 	bot.Handle("/month", hub.HandleMonthCommand)

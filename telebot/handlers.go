@@ -24,6 +24,31 @@ func NewHandlerHub(billService *bill.Service, teleService *telegram.Service, use
 	return &HandlersHub{billService: billService, teleService: teleService, userStateManager: userStateManager}
 }
 
+const helpMessage = `欢迎使用记账机器人！
+
+以下是可用的命令：
+	/start - 开始使用
+	/day - 查看当日账单
+	/month - 查看当月账单
+	/set_keyboard - 设置快捷键盘
+	/cancel - 取消当前操作
+
+如何记账：
+	直接向机器人发送要记录的账单类别
+	待机器人回复后，再发送金额，即可完成本次记账
+
+	金额前面带上\"+\"号表示收入，不带表示支出
+	账单类别可以使用快捷键盘，也可以手动输入
+
+如何自定义快捷键盘：
+	请按照以下格式输入你想要设置的快捷键盘，例如：
+
+	饮食,出行,杂项|娱乐,购物,房租|工资,基金
+
+	其中\"｜\"表示换行
+	在上面的例子中，则表示设置一个三行的快捷键盘，第一行设置了「饮食」、「出行」、「杂项」三个账单类别，以此类推
+`
+
 func (hub *HandlersHub) HandleStartCommand(ctx telebot.Context) error {
 	chat := ctx.Chat()
 	if chat == nil {
@@ -34,12 +59,17 @@ func (hub *HandlersHub) HandleStartCommand(ctx telebot.Context) error {
 	if err != nil {
 		return err
 	}
-	defaultKeyboard := textToKeyboard("饮食,出行,杂项|娱乐,购物|工资")
-	err = ctx.Send("hello", &telebot.ReplyMarkup{ReplyKeyboard: defaultKeyboard}) // TODO send help message
+	defaultKeyboard := textToKeyboard("饮食,出行,杂项|娱乐,购物,房租|工资")
+	err = ctx.Send(helpMessage, &telebot.ReplyMarkup{ReplyKeyboard: defaultKeyboard})
 	if err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
+}
+
+func (hub *HandlersHub) HandleHelpCommand(ctx telebot.Context) error {
+	err := ctx.Send(helpMessage)
+	return errors.WithStack(err)
 }
 
 func (hub *HandlersHub) HandleDayCommand(ctx telebot.Context) error {
@@ -315,6 +345,6 @@ func (hub *HandlersHub) HandleCancelBillCallback(ctx telebot.Context) error {
 	if err != nil {
 		return err
 	}
-	err = ctx.Edit("已撤销账单并回滚余额")
+	err = ctx.Edit("已撤销账单")
 	return errors.WithStack(err)
 }

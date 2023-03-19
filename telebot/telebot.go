@@ -25,6 +25,7 @@ func RegisterHandlers(bot *telebot.Bot, hub *HandlersHub) {
 	bot.Handle("/cancel", hub.HandleCancelCommand)
 	bot.Handle("/set_keyboard", hub.HandleSetKeyboardCommand)
 	bot.Handle("/set_balance", hub.HandleSetBalanceCommand)
+	bot.Handle("/balance", hub.HandleBalanceCommand)
 	bot.Handle(telebot.OnText, hub.HandleText)
 	// 回调
 	bot.Handle(&prevDayBillBtnTmpl, hub.HandleDayBillSelectionCallback)

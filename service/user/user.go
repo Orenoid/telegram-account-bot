@@ -29,6 +29,21 @@ func (receiver *Service) SetUserBalance(userID uint, balance float64) (float64, 
 	return newBalance, nil
 }
 
+func (receiver *Service) GetUserBalance(userID uint) (float64, error) {
+	userExists, err := receiver.userRepo.CheckUserExists(userID)
+	if err != nil {
+		return 0, err
+	}
+	if !userExists {
+		return 0, errors.New("user not found")
+	}
+	balance, err := receiver.userRepo.GetUserBalance(userID)
+	if err != nil {
+		return 0, err
+	}
+	return balance, nil
+}
+
 func NewUserService(userRepo user.Repository) *Service {
 	return &Service{userRepo: userRepo}
 }

@@ -12,6 +12,15 @@ type mysqlRepo struct {
 	db *gorm.DB
 }
 
+func (receiver *mysqlRepo) GetUserBalance(userID uint) (float64, error) {
+	userModel := &models.User{}
+	result := receiver.db.First(userModel, userID)
+	if result.Error != nil {
+		return 0, errors.WithStack(result.Error)
+	}
+	return userModel.Balance.Decimal.InexactFloat64(), nil
+}
+
 func (receiver *mysqlRepo) CreateUser() (*models.User, error) {
 	userModel := &models.User{}
 	result := receiver.db.Create(userModel)

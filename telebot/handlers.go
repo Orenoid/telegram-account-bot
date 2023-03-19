@@ -34,6 +34,8 @@ const helpMessage = `欢迎使用记账机器人！
 	/month - 查看当月账单
 	/set_keyboard - 设置快捷键盘
 	/cancel - 取消当前操作
+	/set_balance - 设置余额
+	/balance - 查询余额
 
 如何记账：
 	直接向机器人发送要记录的账单类别
@@ -49,6 +51,11 @@ const helpMessage = `欢迎使用记账机器人！
 
 	其中\"｜\"表示换行
 	在上面的例子中，则表示设置一个三行的快捷键盘，第一行设置了「饮食」、「出行」、「杂项」三个账单类别，以此类推
+
+如何设置余额：
+	在聊天框中输入 /set_balance 后跟上您想要设置的余额，例如：
+
+	/set_balance 1000
 `
 
 func (hub *HandlersHub) HandleStartCommand(ctx telebot.Context) error {
@@ -369,5 +376,22 @@ func (hub *HandlersHub) HandleSetBalanceCommand(ctx telebot.Context) error {
 		return err
 	}
 	err = ctx.Send(fmt.Sprintf("已将您的余额设置为 %.2f", amount))
+	return errors.WithStack(err)
+}
+
+func (hub *HandlersHub) HandleBalanceCommand(ctx telebot.Context) error {
+	sender := ctx.Sender()
+	if sender == nil {
+		return nil
+	}
+	baseUserID, err := hub.teleService.GetBaseUserID(sender.ID)
+	if err != nil {
+		return err
+	}
+	balance, err := hub.userService.GetUserBalance(baseUserID)
+	if err != nil {
+		return err
+	}
+	err = ctx.Send(fmt.Sprintf("您的余额为 %.2f", balance))
 	return errors.WithStack(err)
 }

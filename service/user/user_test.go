@@ -17,9 +17,8 @@ func TestNewUserService(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	ur := user.NewMockRepository(ctrl)
-	us, err := NewUserService(ur)
+	us := NewUserService(ur)
 
-	assert.NoError(t, err)
 	assert.True(t, ur == us.userRepo)
 }
 
@@ -34,7 +33,7 @@ func (suite *UserServiceTestSuite) SetupTest(t *testing.T) func() {
 	suite.userMockCtrl = gomock.NewController(t)
 	suite.userRepo = user.NewMockRepository(suite.userMockCtrl)
 	var err error
-	suite.userService, err = NewUserService(suite.userRepo)
+	suite.userService = NewUserService(suite.userRepo)
 	if err != nil {
 		panic(err)
 	}

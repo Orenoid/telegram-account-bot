@@ -6,11 +6,12 @@ import (
 	"github.com/golang/mock/gomock"
 	billDAL "github.com/orenoid/telegram-account-bot/dal/bill"
 	teleDAL "github.com/orenoid/telegram-account-bot/dal/telegram"
-	"github.com/orenoid/telegram-account-bot/dal/user"
+	userDAL "github.com/orenoid/telegram-account-bot/dal/user"
 	"github.com/orenoid/telegram-account-bot/mock/telebotmock"
 	"github.com/orenoid/telegram-account-bot/models"
 	"github.com/orenoid/telegram-account-bot/service/bill"
 	"github.com/orenoid/telegram-account-bot/service/telegram"
+	"github.com/orenoid/telegram-account-bot/service/user"
 	"github.com/orenoid/telegram-account-bot/utils/strings"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -24,13 +25,15 @@ import (
 func TestNewHandlerHub(t *testing.T) {
 	billService := &bill.Service{}
 	teleService := &telegram.Service{}
+	userService := &user.Service{}
 	manager := NewInMemoryUserStateManager()
-	hub := NewHandlerHub(billService, teleService, manager)
+	hub := NewHandlerHub(billService, teleService, userService, manager)
 	assert.IsType(t, &HandlersHub{}, hub)
 	assert.NotNil(t, hub)
 	assert.True(t, hub.teleService == teleService)
 	assert.True(t, hub.userStateManager == manager)
 	assert.True(t, hub.billService == billService)
+	assert.True(t, hub.userService == userService)
 }
 
 type HandlersHubTestSuite struct {
@@ -38,10 +41,11 @@ type HandlersHubTestSuite struct {
 
 	teleRepo *teleDAL.MockRepository
 	billRepo *billDAL.MockRepository
-	userRepo *user.MockRepository
+	userRepo *userDAL.MockRepository
 
 	teleService *telegram.Service
 	billService *bill.Service
+	userService *user.Service
 
 	userStateManager *MockUserStateManager
 
@@ -51,13 +55,14 @@ type HandlersHubTestSuite struct {
 func (suite *HandlersHubTestSuite) SetupTest(t *testing.T) func() {
 	suite.teleRepo = teleDAL.NewMockRepository(gomock.NewController(t))
 	suite.billRepo = billDAL.NewMockRepository(gomock.NewController(t))
-	suite.userRepo = user.NewMockRepository(gomock.NewController(t))
+	suite.userRepo = userDAL.NewMockRepository(gomock.NewController(t))
 
 	suite.teleService = telegram.NewService(suite.teleRepo)
 	suite.billService = bill.NewService(suite.billRepo, suite.userRepo)
+	suite.userService = user.NewUserService(suite.userRepo)
 	suite.userStateManager = NewMockUserStateManager(gomock.NewController(t))
 
-	suite.hub = NewHandlerHub(suite.billService, suite.teleService, suite.userStateManager)
+	suite.hub = NewHandlerHub(suite.billService, suite.teleService, suite.userService, suite.userStateManager)
 
 	return func() {
 		suite.teleRepo = nil
@@ -78,13 +83,13 @@ func (suite *HandlersHubTestSuite) TestHandleStartCommand() {
 
 	ctx.EXPECT().Chat().Return(&telebot.Chat{ID: 592371906012}).Times(1)
 	ctx.EXPECT().Sender().Return(&telebot.User{ID: 417714530102, Username: "JustARandomName"}).Times(1)
-	ctx.EXPECT().Send("hello", &telebot.ReplyMarkup{
+	ctx.EXPECT().Send(helpMessage, &telebot.ReplyMarkup{
 		ReplyKeyboard: [][]telebot.ReplyButton{
 			{
 				{Text: "饮食"}, {Text: "出行"}, {Text: "杂项"},
 			},
 			{
-				{Text: "娱乐"}, {Text: "购物"},
+				{Text: "娱乐"}, {Text: "购物"}, {Text: "房租"},
 			},
 			{
 				{Text: "工资"},

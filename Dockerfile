@@ -9,6 +9,7 @@ RUN go build -o migrate-cli ./cmd/migrate_cli.go
 FROM alpine:3.14
 WORKDIR /root/
 COPY --from=build /app/telebotctl .
+COPY --from=build /app/migrate-cli .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]

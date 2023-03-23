@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-var cmd = &cobra.Command{
+var telebotCmd = &cobra.Command{
 	Use:   "telebotctl",
 	Short: "telebotctl - start the telegram bot",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -61,7 +61,7 @@ var cmd = &cobra.Command{
 }
 
 func main() {
-	if err := cmd.Execute(); err != nil {
+	if err := telebotCmd.Execute(); err != nil {
 		panic(err)
 	}
 }

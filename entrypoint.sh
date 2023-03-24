@@ -1,3 +1,3 @@
 #!/bin/sh
-./migrate-cli
-./telebotctl
+./telebotctl db migrate
+./telebot

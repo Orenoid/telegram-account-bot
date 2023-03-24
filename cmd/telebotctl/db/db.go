@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"fmt"
@@ -9,6 +9,15 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
+
+var Cmd = &cobra.Command{
+	Use:   "db",
+	Short: "操作数据库",
+}
+
+func init() {
+	Cmd.AddCommand(migrateCmd)
+}
 
 var migrateCmd = &cobra.Command{
 	Use:   "migrate",
@@ -27,11 +36,4 @@ var migrateCmd = &cobra.Command{
 
 		fmt.Println("Database schema migrated successfully")
 	},
-}
-
-func main() {
-	err := migrateCmd.Execute()
-	if err != nil {
-		panic(err)
-	}
 }

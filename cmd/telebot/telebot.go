@@ -10,6 +10,7 @@ import (
 	teleservice "github.com/orenoid/telegram-account-bot/service/telegram"
 	"github.com/orenoid/telegram-account-bot/service/user"
 	"github.com/orenoid/telegram-account-bot/telebot"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	tele "gopkg.in/telebot.v3"
 	"time"
@@ -52,6 +53,19 @@ var telebotCmd = &cobra.Command{
 		bot, err := telebot.NewBot(settings, hub)
 		if err != nil {
 			panic(err)
+		}
+		err = bot.SetCommands([]tele.Command{
+			{Text: "/help", Description: "查看使用帮助"},
+			{Text: "/start", Description: "初始化"},
+			{Text: "/day", Description: "今日收支"},
+			{Text: "/month", Description: "本月收支"},
+			{Text: "/cancel", Description: "取消当前操作"},
+			{Text: "/set_keyboard", Description: "设置快捷键盘"},
+			{Text: "/set_balance", Description: "设置余额"},
+			{Text: "/balance", Description: "查询余额"},
+		})
+		if err != nil {
+			logrus.Warnf("failed to set commands, err: %+v", err)
 		}
 
 		fmt.Println("Running telebot with a LongPoller...")

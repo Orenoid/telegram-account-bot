@@ -63,6 +63,8 @@ var telebotCmd = &cobra.Command{
 			{Text: "/set_keyboard", Description: "设置快捷键盘"},
 			{Text: "/set_balance", Description: "设置余额"},
 			{Text: "/balance", Description: "查询余额"},
+			{Text: "/create_token", Description: "创建用于 OpenAPI 的 token"},
+			{Text: "/disable_all_tokens", Description: "废弃所有 token"},
 		})
 		if err != nil {
 			logrus.Warnf("failed to set commands, err: %+v", err)

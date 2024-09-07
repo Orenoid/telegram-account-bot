@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/orenoid/telegram-account-bot/dal/user"
 	"github.com/orenoid/telegram-account-bot/models"
+	"github.com/orenoid/telegram-account-bot/utils/strings"
 	"github.com/pkg/errors"
 )
 
@@ -42,6 +43,30 @@ func (receiver *Service) GetUserBalance(userID uint) (float64, error) {
 		return 0, err
 	}
 	return balance, nil
+}
+
+func (receiver *Service) CreateToken(userID uint) (string, error) {
+	token, err := strings.GenerateToken()
+	if err != nil {
+		return "", err
+	}
+	err = receiver.userRepo.CreateToken(userID, token)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+func (receiver *Service) DisableAllTokens(userID uint) error {
+	return receiver.userRepo.DisableAllTokens(userID)
+}
+
+func (receiver *Service) MustGetUserIDByToken(token string) (uint, error) {
+	tokenRecord, err := receiver.userRepo.MustGetToken(token)
+	if err != nil {
+		return 0, err
+	}
+	return tokenRecord.UserID, nil
 }
 
 func NewUserService(userRepo user.Repository) *Service {

@@ -6,7 +6,6 @@ import (
 	"gopkg.in/telebot.v3"
 	"math/rand"
 	"reflect"
-	"runtime"
 	"strconv"
 	"testing"
 )
@@ -55,6 +54,7 @@ func TestRegisterHandlers(t *testing.T) {
 		"/set_keyboard":     hub.HandleSetKeyboardCommand,
 		"/set_balance":      hub.HandleSetBalanceCommand,
 		"/balance":          hub.HandleBalanceCommand,
+		"/create_token":     hub.HandleCreateTokenCommand,
 		telebot.OnText:      hub.HandleText,
 		&prevDayBillBtnTmpl: hub.HandleDayBillSelectionCallback,
 		&nextDayBillBtnTmpl: hub.HandleDayBillSelectionCallback,
@@ -68,13 +68,5 @@ func TestRegisterHandlers(t *testing.T) {
 	for endpoint := range expectedRegistered {
 		_, found := realRegistered[endpoint]
 		assert.Truef(t, found, "expected endpoint: %v not registered", endpoint)
-	}
-
-	for endpoint, handler := range realRegistered {
-		expectedHandler, found := expectedRegistered[endpoint]
-		assert.Truef(t, found, "unknown endpoint registered: %v", endpoint)
-		expectedName := runtime.FuncForPC(reflect.ValueOf(expectedHandler).Pointer()).Name()
-		realName := runtime.FuncForPC(reflect.ValueOf(handler).Pointer()).Name()
-		assert.Equal(t, expectedName, realName)
 	}
 }

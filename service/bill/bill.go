@@ -5,6 +5,7 @@ import (
 	"github.com/orenoid/telegram-account-bot/dal/user"
 	"github.com/orenoid/telegram-account-bot/models"
 	"github.com/pkg/errors"
+	"time"
 )
 
 type Service struct {
@@ -31,6 +32,35 @@ func (receiver *Service) GetUserBillsByCreateTime(userID uint, opts ...bill.GetU
 // CancelBillAndUpdateUserBalance 取消订单并更新用户余额
 func (receiver *Service) CancelBillAndUpdateUserBalance(billID uint) error {
 	return receiver.billRepo.DeleteBillAndUpdateUserBalance(billID)
+}
+
+type CreateBillDTO struct {
+	Amount    float64
+	Category  string
+	Name      *string    // optional
+	CreatedAt *time.Time // if not provided, then use current time as default
+}
+
+func (receiver *Service) CreateNewBills(userID uint, billDTOs []CreateBillDTO) error {
+	userExists, err := receiver.userRepo.CheckUserExists(userID)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	if !userExists {
+		return errors.New("user not exists")
+	}
+	createBillParams := make([]bill.CreateBillParams, 0, len(billDTOs))
+	for _, billDTO := range billDTOs {
+		createBillParams = append(createBillParams, bill.CreateBillParams{
+			Amount:   billDTO.Amount,
+			Category: billDTO.Category,
+			CreateBillOptions: bill.CreateBillOptions{
+				Name:      billDTO.Name,
+				CreatedAt: billDTO.CreatedAt,
+			},
+		})
+	}
+	return receiver.billRepo.CreateBillsAndUpdateUserBalance(userID, createBillParams)
 }
 
 func NewService(billRepo bill.Repository, userRepo user.Repository) *Service {

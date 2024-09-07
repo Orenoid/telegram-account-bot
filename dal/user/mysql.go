@@ -12,6 +12,65 @@ type mysqlRepo struct {
 	db *gorm.DB
 }
 
+func (receiver *mysqlRepo) MustGetToken(token string) (*models.Token, error) {
+	var foundToken models.Token
+
+	// 查找指定 token 的记录
+	err := receiver.db.Where("token = ?", token).First(&foundToken).Error
+	if err != nil {
+		// 如果未找到记录，或者发生其他错误，返回 nil 和错误信息
+		return nil, errors.WithStack(err)
+	}
+
+	// 返回找到的 token 记录
+	return &foundToken, nil
+}
+
+func (receiver *mysqlRepo) CreateToken(userID uint, token string) error {
+	newTokenRecord := &models.Token{
+		UserID: userID,
+		Token:  token,
+	}
+	result := receiver.db.Create(newTokenRecord)
+	if result.Error != nil {
+		return errors.WithStack(result.Error)
+	}
+	return nil
+}
+
+func (receiver *mysqlRepo) ValidateToken(token string) (bool, error) {
+	var existingToken models.Token
+
+	// 查找用户的 token
+	err := receiver.db.Where("token = ?", token).First(&existingToken).Error
+	if err != nil {
+		// 如果没有找到 token，返回 false 和 nil 错误
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		// 其他数据库错误
+		return false, errors.WithStack(err)
+	}
+
+	// 如果找到了 token，返回 true
+	return true, nil
+}
+
+func (receiver *mysqlRepo) DisableToken(userID uint, token string) error {
+	if err := receiver.db.Where(
+		"user_id = ? AND token = ?", userID, token).Delete(&models.Token{}).Error; err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func (receiver *mysqlRepo) DisableAllTokens(userID uint) error {
+	if err := receiver.db.Where("user_id = ?", userID).Delete(&models.Token{}).Error; err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
 func (receiver *mysqlRepo) GetUserBalance(userID uint) (float64, error) {
 	userModel := &models.User{}
 	result := receiver.db.First(userModel, userID)

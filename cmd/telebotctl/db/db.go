@@ -29,7 +29,7 @@ var migrateCmd = &cobra.Command{
 		}
 		db, err := gorm.Open(mysql.Open(config.MysqlDSN), &gorm.Config{DisableAutomaticPing: false})
 
-		err = db.AutoMigrate(&models.User{}, &models.Bill{}, &models.TelegramUser{})
+		err = db.AutoMigrate(&models.User{}, &models.Bill{}, &models.TelegramUser{}, &models.Token{})
 		if err != nil {
 			panic(err)
 		}

@@ -13,6 +13,59 @@ type mysqlRepo struct {
 	db *gorm.DB
 }
 
+func (receiver *mysqlRepo) CreateBillsAndUpdateUserBalance(userID uint, billParams []CreateBillParams) error {
+	err := receiver.db.Transaction(func(tx *gorm.DB) error {
+		userModel := &models.User{}
+		result := tx.Where("id = ?", userID).First(userModel)
+		if result.Error != nil {
+			return errors.WithStack(result.Error)
+		}
+
+		billRecords := make([]models.Bill, 0, len(billParams))
+		for _, billParam := range billParams {
+			billRecord := &models.Bill{
+				UserID:   userID,
+				Amount:   decimal.NewFromFloat(billParam.Amount),
+				Category: billParam.Category,
+			}
+			if billParam.Name != nil {
+				billRecord.Name = sql.NullString{String: *billParam.Name, Valid: true}
+			}
+			if billParam.CreatedAt != nil {
+				billRecord.CreatedAt = *billParam.CreatedAt
+				billRecord.UpdatedAt = *billParam.CreatedAt
+			}
+			billRecords = append(billRecords, *billRecord)
+		}
+
+		result = tx.Create(billRecords)
+		if result.Error != nil {
+			return errors.WithStack(result.Error)
+		}
+		if result.RowsAffected != int64(len(billRecords)) {
+			return errors.New("failed to create bill")
+		}
+
+		if userModel.Balance.Valid {
+			for _, billRecord := range billRecords {
+				userModel.Balance.Decimal = userModel.Balance.Decimal.Add(billRecord.Amount)
+			}
+			result := tx.Save(userModel)
+			if result.Error != nil {
+				return errors.WithStack(result.Error)
+			}
+			if result.RowsAffected != 1 {
+				return errors.New("failed to update user balance")
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
 func (receiver *mysqlRepo) CreateBillAndUpdateUserBalance(userID uint, amount float64, category string, opts ...CreateBillOptions) (*models.Bill, error) {
 	// TODO 解决并发更新余额问题，以及查询用户与更新余额的非原子操作场景
 	var newBill *models.Bill

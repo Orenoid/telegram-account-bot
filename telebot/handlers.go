@@ -36,6 +36,8 @@ const helpMessage = `欢迎使用记账机器人！
 	/cancel - 取消当前操作
 	/set_balance - 设置余额
 	/balance - 查询余额
+	/create_token - 创建用于 OpenAPI 的 token
+	/disable_all_tokens - 废弃所有 token
 
 如何记账：
 	直接向机器人发送要记录的账单类别
@@ -84,6 +86,7 @@ func (hub *HandlersHub) HandleHelpCommand(ctx telebot.Context) error {
 func (hub *HandlersHub) HandleDayCommand(ctx telebot.Context) error {
 	sender := ctx.Sender()
 	now := time.Now()
+	// TODO get location from user, same for other commands
 	begin, end := getDayRange(now)
 
 	baseUserID, err := hub.teleService.GetBaseUserID(sender.ID)
@@ -219,7 +222,7 @@ func (hub *HandlersHub) OnCreatingBill(ctx telebot.Context, userState *UserState
 
 var validAmount = regexp.MustCompile("^([+-]?)([0-9]*\\.?[0-9]+)$")
 
-//parseAmount 解析数额，若前面不带 "+"，则默认会解析为负数（平时大多数时候为支出）
+// parseAmount 解析数额，若前面不带 "+"，则默认会解析为负数（平时大多数时候为支出）
 func parseAmount(text string) (float64, error) {
 	matchResult := validAmount.FindStringSubmatch(text)
 	if len(matchResult) == 0 {
@@ -393,5 +396,41 @@ func (hub *HandlersHub) HandleBalanceCommand(ctx telebot.Context) error {
 		return err
 	}
 	err = ctx.Send(fmt.Sprintf("您的余额为 %.2f", balance))
+	return errors.WithStack(err)
+}
+
+func (hub *HandlersHub) HandleCreateTokenCommand(ctx telebot.Context) error {
+	// get user id
+	sender := ctx.Sender()
+	if sender == nil {
+		return nil
+	}
+	baseUserID, err := hub.teleService.GetBaseUserID(sender.ID)
+	if err != nil {
+		return err
+	}
+	// create token
+	token, err := hub.userService.CreateToken(baseUserID)
+	if err != nil {
+		return err
+	}
+	err = ctx.Send(fmt.Sprintf("New token created:\n%s", token))
+	return errors.WithStack(err)
+}
+
+func (hub *HandlersHub) HandleDisableAllTokensCommand(ctx telebot.Context) error {
+	sender := ctx.Sender()
+	if sender == nil {
+		return nil
+	}
+	baseUserID, err := hub.teleService.GetBaseUserID(sender.ID)
+	if err != nil {
+		return err
+	}
+	err = hub.userService.DisableAllTokens(baseUserID)
+	if err != nil {
+		return err
+	}
+	err = ctx.Send("All tokens disabled")
 	return errors.WithStack(err)
 }

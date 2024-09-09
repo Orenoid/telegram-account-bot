@@ -7,9 +7,10 @@ RUN go build -o telebotctl ./cmd/telebotctl/telebotctl.go
 
 # Final Stage
 FROM alpine:3.14
+RUN apk update && apk add tzdata
 WORKDIR /root/
 COPY --from=build /app/telebot .
 COPY --from=build /app/telebotctl .
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
+COPY bot-entrypoint.sh .
+RUN chmod +x bot-entrypoint.sh
+ENTRYPOINT ["./bot-entrypoint.sh"]

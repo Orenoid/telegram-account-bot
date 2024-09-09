@@ -24,12 +24,21 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t telegram-account-bot .
+          docker build -t telegram-account-bot -f bot.Dockerfile .
           docker tag telegram-account-bot ${{ env.DOCKER_USERNAME }}/telegram-account-bot
+          docker build -t telegram-account-bot-api -f api.Dockerfile .
+          docker tag telegram-account-bot-api ${{ env.DOCKER_USERNAME }}/telegram-account-bot-api
 
-      - name: Push Docker Image
+      - name: Push Bot Docker Image
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: ${{ env.DOCKER_USERNAME }}/telegram-account-bot:latest
+
+      - name: Push Api Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ env.DOCKER_USERNAME }}/telegram-account-bot-api:latest

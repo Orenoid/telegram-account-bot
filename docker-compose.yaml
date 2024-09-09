@@ -4,24 +4,37 @@ services:
   db:
     image: mysql:latest
     restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: account
-      MYSQL_ROOT_PASSWORD: temppassword
+    env_file: "env/db.env"
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
 
-  app:
+  bot:
     image: orenoid/telegram-account-bot
+    build:
+      context: .
+      dockerfile: bot.Dockerfile
     restart: unless-stopped
-    environment:
-      MYSQL_DSN: root:temppassword@tcp(db:3306)/account?charset=utf8mb4&parseTime=True&loc=Local
-      TELEBOT_TOKEN: YOUR_TELEBOT_TOKEN_HERE
+    env_file: "env/bot.env"
     ports:
       - "8080:8080"
     depends_on:
       - db
+
+  api:
+    image: orenoid/telegram-account-bot-api
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    restart: unless-stopped
+    env_file: "env/api.env"
+    ports:
+      - "1323:1323"
+    depends_on:
+      - db
+      - bot
+
 
 volumes:
   db_data:

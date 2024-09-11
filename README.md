@@ -1,3 +1,5 @@
+[English](./README-en.md) | 简体中文
+
 # Telegram 记账机器人
 
 这是一个 Telegram 记账机器人，可以帮助你记录支出和收入。
@@ -34,7 +36,7 @@
     /disable_all_tokens 废弃所有 token
 
 ## TODO
-- [x] 自动设置机器人 Commands
+- [x] Automatically update Bot Commands
 - [x] Open API
-- [ ] 多语言（不一定做）
-- [ ] ~~定时自动记账~~（暂不考虑，未来可自行使用 Open API 实现）
+- [ ] Multilingual
+- [ ] Natural language interface

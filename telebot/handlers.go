@@ -3,16 +3,17 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	billDAL "github.com/orenoid/telegram-account-bot/dal/bill"
 	"github.com/orenoid/telegram-account-bot/service/bill"
 	"github.com/orenoid/telegram-account-bot/service/telegram"
 	"github.com/orenoid/telegram-account-bot/service/user"
 	"github.com/pkg/errors"
 	"gopkg.in/telebot.v3"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type HandlersHub struct {
@@ -160,8 +161,8 @@ func getMonthRange(t time.Time) (time.Time, time.Time) {
 	currentLocation := t.Location()
 
 	firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
-	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-	return firstOfMonth, lastOfMonth
+	firstOfNextMonth := firstOfMonth.AddDate(0, 1, 0)
+	return firstOfMonth, firstOfNextMonth
 }
 
 func (hub *HandlersHub) HandleText(ctx telebot.Context) error {
